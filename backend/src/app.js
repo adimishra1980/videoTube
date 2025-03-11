@@ -37,6 +37,22 @@ app.use("/api/v1/likes", likeRouter);
 app.use("/api/v1/playlist", playlistRouter);
 app.use("/api/v1/dashboard", dashboardRouter);
 
+
+
+
+// common error handler middlerware
+app.use((err, req, res, next) => {
+  
+  let {statusCode=500, message="some error occurred"} = err
+
+  return res.status(statusCode).json({
+    success: false,
+    error: message,
+    errors: err.errors || []
+  })
+})
+
+
 // http://localhost:8000/api/v1/users/register
 
 export { app };
