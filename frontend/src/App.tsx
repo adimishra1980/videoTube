@@ -1,11 +1,18 @@
-import "./App.css";
-import Home from "./pages/Home";
+import { ReactNode } from "react";
+import SideBarProvider from "./contexts/SideBarContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
-function App() {
+type AppProps = {
+  children: ReactNode;
+};
+
+function App({ children }: AppProps) {
   return (
-    <>
-      <Home />
-    </>
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <SideBarProvider>
+        {children}
+      </SideBarProvider>
+    </ThemeProvider>
   );
 }
 

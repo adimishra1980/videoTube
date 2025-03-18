@@ -1,39 +1,29 @@
-import { Link } from "react-router-dom";
-import Logo from "../assets/Logo.jpg";
 import { ArrowLeft, Bell, Menu, Mic, Search, Upload, User } from "lucide-react";
-import { Button } from "../components/ui/Button";
+import logo from "../assets/Logo.jpg";
+import { Button } from "../components/Button";
 import { useState } from "react";
+import { useSideBarContext } from "../contexts/SideBarContext";
+import ThemeToggle from "@/components/ThemeToggle";
 
-const PageHeader = () => {
-  const [showFullWidthSearch, setShowFullWidthSeach] = useState(false);
+function PageHeader() {
+  const [showFullWidthSearch, setShowFullWidthSearch] = useState(false);
 
   return (
     <div className="flex gap-10 lg:gap-20 justify-between pt-2 mb-6 mx-4">
-      <div
-        className={` gap-4 items-center flex-shrink-0 ${
-          showFullWidthSearch ? "hidden" : "flex"
-        } `}
-      >
-        <Button variant="ghost" size="icon">
-          <Menu />
-        </Button>
-        <Link to="/">
-          <img src={Logo} className=" h-6" />
-        </Link>
-      </div>
+      <PageHeaderFirstSection hidden={showFullWidthSearch} />
 
       <form
-        className={` gap-4 flex-grow justify-center ${
-          showFullWidthSearch ? "flex" : "md:flex hidden"
-        } `}
+        className={`gap-4 flex-grow justify-center ${
+          showFullWidthSearch ? "flex" : "hidden md:flex"
+        }`}
       >
         {showFullWidthSearch && (
           <Button
-            onClick={() => setShowFullWidthSeach(false)}
+            onClick={() => setShowFullWidthSearch(false)}
             type="button"
             size="icon"
             variant="ghost"
-            className=" flex-shrink-0"
+            className="flex-shrink-0"
           >
             <ArrowLeft />
           </Button>
@@ -42,9 +32,9 @@ const PageHeader = () => {
           <input
             type="search"
             placeholder="Search"
-            className=" rounded-l-full border border-secondary-border shadow-inner shadow-secondary py-1 px-4 text-md w-full focus:border-blue-500 outline-none"
+            className="rounded-l-full border border-secondary-marginal-border shadow-inner py-1 px-4 text-base w-full focus:border-blue-500 outline-none dark:bg-[#121212]"
           />
-          <Button className=" py-2 px-4 rounded-r-full border border-l-0 border-secondary-border flex-shrink-0">
+          <Button className="py-2 px-4 rounded-r-full border-secondary-marginal-border border border-l-0 flex-shrink-0">
             <Search />
           </Button>
         </div>
@@ -54,37 +44,61 @@ const PageHeader = () => {
       </form>
 
       <div
-        className={`flex-shrink-0 md:gap-2 justify-center ${
+        className={`flex-shrink-0 md:gap-2 ${
           showFullWidthSearch ? "hidden" : "flex"
         }`}
       >
         <Button
+          onClick={() => setShowFullWidthSearch(true)}
           size="icon"
           variant="ghost"
           className="md:hidden"
-          onClick={() => setShowFullWidthSeach(true)}
         >
           <Search />
         </Button>
-
         <Button size="icon" variant="ghost" className="md:hidden">
           <Mic />
         </Button>
 
+        <ThemeToggle />
+
         <Button size="icon" variant="ghost">
           <Upload />
         </Button>
-
         <Button size="icon" variant="ghost">
           <Bell />
         </Button>
-
         <Button size="icon" variant="ghost">
           <User />
         </Button>
       </div>
     </div>
   );
-};
+}
 
 export default PageHeader;
+
+type PageHeaderFirstSectionProps = {
+  hidden?: boolean;
+};
+
+export function PageHeaderFirstSection({
+  hidden = false,
+}: PageHeaderFirstSectionProps) {
+  const { toggle } = useSideBarContext();
+
+  return (
+    <div
+      className={`gap-4 items-center flex-shrink-0 ${
+        hidden ? "hidden" : "flex"
+      }`}
+    >
+      <Button onClick={toggle} variant="ghost" size="icon">
+        <Menu />
+      </Button>
+      <a href="/">
+        <img src={logo} className="h-6" />
+      </a>
+    </div>
+  );
+}

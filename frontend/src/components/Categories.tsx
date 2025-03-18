@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "./ui/Button";
+import { Button } from "./Button";
 import { useEffect, useRef, useState } from "react";
 
 interface CategoryProps {
@@ -20,7 +20,6 @@ const Categories = ({
   const [translate, setTranslate] = useState(0);
   const conatinerRef = useRef<HTMLDivElement>(null);
 
-   
   useEffect(() => {
     if (conatinerRef.current == null) return;
 
@@ -42,8 +41,7 @@ const Categories = ({
       observer.disconnect();
     };
   }, [categories, translate]);
- 
-  
+
   return (
     <div ref={conatinerRef} className="overflow-x-hidden relative">
       <div
@@ -52,7 +50,7 @@ const Categories = ({
       >
         {categories.map((category) => (
           <Button
-            className="py-1 px-3 rounded-lg whitespace-nowrap"
+            className={`py-1.5 px-3.5 rounded-lg whitespace-nowrap  text-[14px] font-medium  ${selectedCategory === category ? "dark:bg-white" : ""} `}
             variant={selectedCategory === category ? "dark" : "default"}
             onClick={() => onSelect(category)}
             key={category}
@@ -63,7 +61,7 @@ const Categories = ({
       </div>
 
       {isLeftVisible && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 bg-gradient-to-r from-white from-50% to-transparent w-24 h-full">
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 bg-gradient-to-r from-white from-50% to-transparent w-28 h-full dark:from-[#0F0F0F] dark:bg-gradient-to-r">
           <Button
             variant="ghost"
             size="icon"
@@ -82,7 +80,7 @@ const Categories = ({
       )}
 
       {isRightVisible && (
-        <div className="absolute  right-0 top-1/2 -translate-y-1/2 bg-gradient-to-l from-white from-50% to-transparent w-24 h-full flex justify-end">
+        <div className="absolute  right-0 top-1/2 -translate-y-1/2 bg-gradient-to-l from-white from-50% to-transparent w-28 h-full flex justify-end dark:from-[#0F0F0F] dark:bg-gradient-to-l">
           <Button
             variant="ghost"
             size="icon"

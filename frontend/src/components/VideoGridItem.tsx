@@ -60,7 +60,7 @@ const VideoGridItem = ({
           }`}
         />
         {/* TIME STAMPS */}
-        <div className="absolute bottom-1 right-1 bg-secondary-dark text-secondary text-sm px-0.5 rounded">
+        <div className="absolute bottom-1 right-1 bg-secondary-marginal-dark text-secondary-marginal text-sm px-0.5 rounded">
           {FormatDuration(duration)}
         </div>
         {/* VIDEO */}
@@ -89,12 +89,12 @@ const VideoGridItem = ({
 
           <a
             href={`/:channel/:${channel.id}`}
-            className="text-secondary-text text-sm"
+            className="text-secondary-marginal-text text-sm hover:text-secondary-marginal-text-hover"
           >
             {channel.name}
           </a>
 
-          <div className="text-secondary-text text-sm">
+          <div className="text-secondary-marginal-text text-sm">
             {VIEWS_FORMATTER.format(views)} views • {formatTimeAgo(postedAt)}
           </div>
         </div>
