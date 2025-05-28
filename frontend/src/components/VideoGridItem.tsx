@@ -60,7 +60,7 @@ const VideoGridItem = ({
           }`}
         />
         {/* TIME STAMPS */}
-        <div className="absolute bottom-1 right-1 bg-secondary-marginal-dark text-secondary-marginal text-sm px-0.5 rounded">
+        <div className="absolute bottom-1 right-1 bg-secondary-marginal-dark text-secondary-marginal text-sm px-0.5 rounded dark:text-secondary-marginal-text-hover">
           {FormatDuration(duration)}
         </div>
         {/* VIDEO */}

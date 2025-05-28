@@ -11,6 +11,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+
 const uploadOnCloudinary = async (localFilePath) => {
   try {
     if (!localFilePath) return null;
@@ -23,6 +24,24 @@ const uploadOnCloudinary = async (localFilePath) => {
 
     // once file is uploaded, we would like to delete it from the our server(public folder)
     fs.unlinkSync(localFilePath);
+    return response;
+  } catch (error) {
+    console.log("Error on cloudinary ", error);
+    fs.unlinkSync(localFilePath);
+    return null;
+  }
+};
+
+const uploadOnCloudinaryWithoutDelete = async (localFilePath) => {
+  try {
+    if (!localFilePath) return null;
+
+    const response = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: "auto",
+    });
+
+    // console.log("File uploaded on cloudinary", response.url);
+
     return response;
   } catch (error) {
     console.log("Error on cloudinary ", error);
@@ -64,4 +83,4 @@ const deleteVideoFromCloudinary = async (cloudUrl) => {
   }
 };
 
-export { uploadOnCloudinary, deleteFromCloudinary, deleteVideoFromCloudinary };
+export { uploadOnCloudinary, deleteFromCloudinary, deleteVideoFromCloudinary, uploadOnCloudinaryWithoutDelete };

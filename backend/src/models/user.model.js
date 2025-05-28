@@ -4,14 +4,14 @@ import jwt from "jsonwebtoken";
 
 const userSchema = new Schema(
   {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-      index: true,
-    },
+    // username: {
+    //   type: String,
+    //   // required: true,
+    //   unique: true,
+    //   lowercase: true,
+    //   trim: true,
+    //   index: true,
+    // },
     email: {
       type: String,
       required: true,
@@ -73,7 +73,7 @@ userSchema.methods.generateAccessToken = function () {
       fullname: this.fullname,
     },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    {expiresIn: process.env.ACCESS_TOKEN_EXPIRY}
   );
 };
 
@@ -85,7 +85,7 @@ userSchema.methods.generateRefreshToken = function () {
       _id: this._id,
     },
     process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+    {expiresIn: process.env.REFRESH_TOKEN_EXPIRY}
   );
 };
 

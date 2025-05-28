@@ -91,8 +91,8 @@ const Categories = ({
                   return translate;
                 }
                 const newTranslate = translate + TRANSLATE_AMOUNT;
-                const edge = conatinerRef.current.scrollWidth;
-                const width = conatinerRef.current.clientWidth;
+                const edge = conatinerRef.current.scrollWidth;   // how much the container can scroll/how wide this is
+                const width = conatinerRef.current.clientWidth;  // this is the visible width we are seeing
                 if (newTranslate + width >= edge) {
                   return edge - width;
                 }

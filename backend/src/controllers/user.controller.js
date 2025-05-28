@@ -5,9 +5,10 @@ import { User } from "../models/user.model.js";
 import {
   uploadOnCloudinary,
   deleteFromCloudinary,
+  uploadOnCloudinaryWithoutDelete,
 } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -42,16 +43,14 @@ const registerUser = asyncHandler(async (req, res) => {
   // check for user creation
   // return res
 
-  const { fullname, username, password, email } = req.body;
+  const { fullname, password, email } = req.body;
 
-  if (
-    [fullname, username, email, password].some((field) => field?.trim() === "")
-  ) {
+  if ([fullname, email, password].some((field) => field?.trim() === "")) {
     throw new ApiError(400, "All fields are required!!");
   }
 
   const existedUser = await User.findOne({
-    $or: [{ username }, { email }],
+    $or: [{ fullname }, { email }],
   });
 
   if (existedUser) {
@@ -59,49 +58,43 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   // console.log(req.files)
+  // const avatarLocalPath = req.files?.avatar?.[0]?.path;
+  // const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
 
-  const avatarLocalPath = req.files?.avatar?.[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+  // console.log("avatarLocalPath", avatarLocalPath)
 
-  // console.log(avatarLocalPath)
-  // console.log(coverImageLocalPath)
-
-  if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar file is required");
-  }
-
-  // const avatar = await uploadOnCloudinary(avatarLocalPath);
-  // let coverImage = "";
-  // if(coverImageLocalPath){
-  //   coverImage = await uploadOnCloudinary(coverImageLocalPath);
+  // if (!avatarLocalPath) {
+  //   throw new ApiError(400, "Avatar file is required");
   // }
 
-  let avatar;
-  try {
-    avatar = await uploadOnCloudinary(avatarLocalPath);
-    // console.log("Uploaded avatar: ", avatar)
-  } catch (error) {
-    console.log("Error uploading avatar ", error);
-    throw new ApiError(500, "Failed to upload avatar");
-  }
+  // let avatar;
+  // try {
+  //   avatar = await uploadOnCloudinary(avatarLocalPath);
+  //   // console.log("Uploaded avatar: ", avatar)
+  // } catch (error) {
+  //   console.log("Error uploading avatar ", error);
+  //   throw new ApiError(500, "Failed to upload avatar");
+  // }
 
-  let coverImage;
-  try {
-    coverImage = await uploadOnCloudinary(coverImageLocalPath);
-    // console.log("Uploaded coverImage: ", coverImage)
-  } catch (error) {
-    console.log("Error uploading coverImage ", error);
-    throw new ApiError(500, "Failed to upload coverImage");
-  }
+  // let coverImage;
+  // try {
+  //   coverImage = await uploadOnCloudinary(coverImageLocalPath);
+  //   // console.log("Uploaded coverImage: ", coverImage)
+  // } catch (error) {
+  //   console.log("Error uploading coverImage ", error);
+  //   throw new ApiError(500, "Failed to upload coverImage");
+  // }
+
+  const defaultAvatarPath = "public/imgs/no-profile-photo.jpg";
+  let avatar = await uploadOnCloudinaryWithoutDelete(defaultAvatarPath);
+  // console.log(defaultAvatarPath)
 
   try {
     const user = await User.create({
       fullname,
-      avatar: avatar.url,
-      coverImage: coverImage?.url || "",
+      avatar: avatar?.url,
       email,
       password,
-      username: username.toLowerCase(),
     });
 
     const createdUser = await User.findById(user._id).select(
@@ -120,13 +113,7 @@ const registerUser = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, createdUser, "User registered successfully"));
   } catch (error) {
     console.log("User creation failed");
-
-    if (avatar) {
-      await deleteFromCloudinary(avatar.public_id);
-    }
-    if (coverImage) {
-      await deleteFromCloudinary(coverImage.public_id);
-    }
+    console.log(error);
 
     throw new ApiError(
       500,
@@ -144,24 +131,24 @@ const loginUser = asyncHandler(async (req, res) => {
   // send token in cookies
   // return res
 
-  const { username, email, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!username || !email || !password) {
+  if (!email || !password) {
     throw new ApiError(400, "All fields are required");
   }
 
   const user = await User.findOne({
-    $or: [{ username }, { email }],
+    $or: [{ email }],
   });
 
   if (!user) {
-    throw new ApiError(404, "User does not exists");
+    throw new ApiError(404, "Invalid email or password");
   }
 
   const isPasswordValid = await user.isPasswordCorrect(password);
 
   if (!isPasswordValid) {
-    throw new ApiError(401, "Invalid user credentials");
+    throw new ApiError(404, "Invalid user credentials");
   }
 
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
@@ -214,18 +201,35 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  const incomingRefreshToken =
-    req.cookies.refreshToken || req.body.refreshToken;
-
-  if (!incomingRefreshToken) {
-    throw new ApiError(401, "Unauthorized request");
-  }
-
   try {
-    const decodedToken = jwt.verify(
-      incomingRefreshToken,
-      process.env.REFRESH_TOKEN_SECRET
-    );
+    const incomingRefreshToken =
+      req.cookies.refreshToken || req.body.refreshToken;
+
+    console.log("cookies: ", req.cookies.refreshToken);
+    console.log("incomingRefreshToken: ", incomingRefreshToken);
+
+    if (!incomingRefreshToken) {
+      throw new ApiError(401, "Unauthorized request");
+    }
+
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(
+        incomingRefreshToken,
+        process.env.REFRESH_TOKEN_SECRET
+      );
+    } catch (err) {
+      console.error("JWT Verify Error:", err.message);
+      throw new ApiError(401, "Refresh token invalid or expired");
+    }
+
+    // const decodedToken = jwt.verify(
+    //   incomingRefreshToken,
+    //   process.env.REFRESH_TOKEN_SECRET
+    // );
+
+    console.log("decoded token", decodedToken);
+
     const user = await User.findById(decodedToken?._id);
 
     if (!user) {

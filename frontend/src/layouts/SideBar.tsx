@@ -47,11 +47,12 @@ function SideBar() {
         />
         <SmallSidebarItem Icon={Library} title="Library" url="/library" />
       </aside>
+
       {isSmallOpen && (
         <div
           onClick={close}
           className="lg:hidden fixed inset-0 z-[999] bg-secondary-marginal-dark opacity-50"
-        />
+        ></div>
       )}
       
       <aside

@@ -1,19 +1,34 @@
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import App from "./App.tsx";
 
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import Home from './pages/Home.tsx'
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Home from "./pages/Home.tsx";
+
+import { store } from "./app/store.ts";
+import { Provider } from "react-redux";
+import RegisterForm from "./components/RegisterForm.tsx";
+import LoginForm from "./components/LoginForm.tsx";
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <Home />,
+  },
+  {
+    path: "/register",
+    element: <RegisterForm />
+  },
+  {
+    path: "/login",
+    element: <LoginForm />
   }
-])
+]);
 
-createRoot(document.getElementById('root')!).render(
-  <App>
-    <RouterProvider router={router} />
-  </App>,
-)
+createRoot(document.getElementById("root")!).render(
+  <Provider store={store}>
+    <App>
+      <RouterProvider router={router} />
+    </App>
+  </Provider>
+);

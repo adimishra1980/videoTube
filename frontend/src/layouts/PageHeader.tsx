@@ -5,17 +5,25 @@ import { useState } from "react";
 import { useSideBarContext } from "../contexts/SideBarContext";
 import ThemeToggle from "@/components/ThemeToggle";
 
+import { useGetCurrentUserQuery } from "@/slices/usersApiSlice";
+
 function PageHeader() {
-  const [showFullWidthSearch, setShowFullWidthSearch] = useState(false);
+  const [showFullWidthSearch, setShowFullWidthSearch] = useState(false); // this is for small screen sizes
+
+  const { data: loggedInUser } = useGetCurrentUserQuery(null);
+
+  const handleQuery = () => {
+    console.log("Data from query:", loggedInUser);
+  };
 
   return (
     <div className="flex gap-10 lg:gap-20 justify-between pt-2 mb-6 mx-4">
       <PageHeaderFirstSection hidden={showFullWidthSearch} />
 
       <form
-        className={`gap-4 flex-grow justify-center ${
+        className={`${
           showFullWidthSearch ? "flex" : "hidden md:flex"
-        }`}
+        } gap-4 flex-grow justify-center`}
       >
         {showFullWidthSearch && (
           <Button
@@ -44,9 +52,9 @@ function PageHeader() {
       </form>
 
       <div
-        className={`flex-shrink-0 md:gap-2 ${
+        className={`${
           showFullWidthSearch ? "hidden" : "flex"
-        }`}
+        } flex-shrink-0 md:gap-2`}
       >
         <Button
           onClick={() => setShowFullWidthSearch(true)}
@@ -68,7 +76,7 @@ function PageHeader() {
         <Button size="icon" variant="ghost">
           <Bell />
         </Button>
-        <Button size="icon" variant="ghost">
+        <Button size="icon" variant="ghost" onClick={handleQuery}>
           <User />
         </Button>
       </div>
@@ -89,9 +97,9 @@ export function PageHeaderFirstSection({
 
   return (
     <div
-      className={`gap-4 items-center flex-shrink-0 ${
+      className={`${
         hidden ? "hidden" : "flex"
-      }`}
+      } gap-4 items-center flex-shrink-0`}
     >
       <Button onClick={toggle} variant="ghost" size="icon">
         <Menu />
