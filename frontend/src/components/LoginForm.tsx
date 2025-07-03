@@ -14,7 +14,6 @@ import { useLoginMutation } from "@/slices/usersApiSlice";
 import {
   setUserCredentials,
   clearLogoutMessage,
-  logoutUser,
 } from "@/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 

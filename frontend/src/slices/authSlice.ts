@@ -43,10 +43,10 @@ const authSlice = createSlice({
       state.isLoggedIn = false;
       state.user = null;
       state.accessToken = null;
-
       // state.logoutMessage = action.payload || "Logged out successfully";
-
       state.logoutMessage = message;
+
+      
 
       localStorage.removeItem("loginStatus");
       localStorage.removeItem("user");

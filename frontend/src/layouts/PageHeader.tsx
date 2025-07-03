@@ -1,20 +1,20 @@
-import { ArrowLeft, Bell, Menu, Mic, Search, Upload, User } from "lucide-react";
+import { ArrowLeft, Bell, Menu, Mic, Search, Upload } from "lucide-react";
 import logo from "../assets/Logo.jpg";
 import { Button } from "../components/Button";
 import { useState } from "react";
 import { useSideBarContext } from "../contexts/SideBarContext";
 import ThemeToggle from "@/components/ThemeToggle";
-
+import UserDropdownMenu from "@/components/dropdowns/UserDropdownMenu";
+import { useAppSelector } from "@/app/hooks";
 import { useGetCurrentUserQuery } from "@/slices/usersApiSlice";
 
 function PageHeader() {
   const [showFullWidthSearch, setShowFullWidthSearch] = useState(false); // this is for small screen sizes
 
-  const { data: loggedInUser } = useGetCurrentUserQuery(null);
+  const { user } = useAppSelector((state) => state.auth);
 
-  const handleQuery = () => {
-    console.log("Data from query:", loggedInUser);
-  };
+  const {data} = useGetCurrentUserQuery()
+
 
   return (
     <div className="flex gap-10 lg:gap-20 justify-between pt-2 mb-6 mx-4">
@@ -76,9 +76,8 @@ function PageHeader() {
         <Button size="icon" variant="ghost">
           <Bell />
         </Button>
-        <Button size="icon" variant="ghost" onClick={handleQuery}>
-          <User />
-        </Button>
+  
+        <UserDropdownMenu user={user}/>
       </div>
     </div>
   );

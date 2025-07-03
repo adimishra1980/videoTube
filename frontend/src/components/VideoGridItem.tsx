@@ -3,19 +3,20 @@ import FormatDuration from "../utils/FormatDuration";
 import { formatTimeAgo } from "../utils/FormatTimeAgo";
 import { useEffect, useRef, useState } from "react";
 
-interface VideoGridItemProps {
-  id: string;
+export interface VideoGridItemProps {
+  _id: string;
   title: string;
-  channel: {
-    id: string;
-    name: string;
-    profileUrl: string;
+  owner: {
+    _id: string;
+    username: string;
+    fullname: string;
+    avatar: string;
   };
   views: number;
-  postedAt: Date;
+  createdAt: Date;
   duration: number;
-  thumbnailUrl: string;
-  videoUrl: string;
+  thumbnail: string;
+  videoFile: string;
 }
 
 const VIEWS_FORMATTER = new Intl.NumberFormat(undefined, {
@@ -23,14 +24,14 @@ const VIEWS_FORMATTER = new Intl.NumberFormat(undefined, {
 });
 
 const VideoGridItem = ({
-  id,
+  _id,
   title,
-  channel,
+  owner,
   views,
-  postedAt,
+  createdAt,
   duration,
-  thumbnailUrl,
-  videoUrl,
+  thumbnail,
+  videoFile,
 }: VideoGridItemProps) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -48,14 +49,14 @@ const VideoGridItem = ({
 
   return (
     <div
-      className="flex flex-col gap-2"
+      className="flex flex-col gap-3 mb-5 cursor-pointer"
       onMouseEnter={() => setIsVideoPlaying(true)}
       onMouseLeave={() => setIsVideoPlaying(false)}
     >
-      <a href={`/:${id}`} className="relative aspect-video">
+      <a href={`/watch?v=${_id}`} className="relative aspect-video">
         <img
-          src={thumbnailUrl}
-          className={`block w-full h-full object-cover transition-[border-radius] duration-200 ${
+          src={thumbnail}
+          className={`block w-full h-full object-cover transition-[border-radius] aspect-video duration-200 ${
             isVideoPlaying ? "rounded-none" : "rounded-xl"
           }`}
         />
@@ -65,37 +66,38 @@ const VideoGridItem = ({
         </div>
         {/* VIDEO */}
         <video
-          src={videoUrl}
+          src={videoFile}
           ref={videoRef}
           muted
           playsInline
-          className={` block h-full object-cover absolute inset-0 transition-opacity duration-200 ${
+          className={` aspect-video block h-full object-cover absolute inset-0 transition-opacity duration-200 ${
             isVideoPlaying ? "opacity-100 delay-200" : "opacity-0"
           }  `}
         />
       </a>
 
       <div className="flex gap-2">
-        <a href={`/:channel/:${channel.id}`} className="flex-shrink-0">
+        <a href={``} className="flex-shrink-0">
           <img
-            src={channel.profileUrl}
+            src={owner.avatar}
             className="w-12 h-12 rounded-full object-cover"
           />
         </a>
         <div className="flex flex-col">
-          <a href={`/:${id}`} className="font-bold">
+          <a href={`/:${_id}`} className="font-bold">
             {title}
           </a>
 
           <a
-            href={`/:channel/:${channel.id}`}
+            href={`/:owner/:${owner._id}`}
             className="text-secondary-marginal-text text-sm hover:text-secondary-marginal-text-hover"
           >
-            {channel.name}
+            {owner.fullname}
           </a>
 
           <div className="text-secondary-marginal-text text-sm">
-            {VIEWS_FORMATTER.format(views)} views • {formatTimeAgo(postedAt)}
+            {VIEWS_FORMATTER.format(views)} views •{" "}
+            {formatTimeAgo(new Date(createdAt))}
           </div>
         </div>
       </div>

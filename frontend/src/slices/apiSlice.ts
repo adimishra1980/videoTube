@@ -79,7 +79,7 @@ const baseQueryWithReauth: BaseQueryFn<
   // If we still get 401, means refresh token is also expired
   if (result.error && result.error?.status === 401) {
     console.error("Unauthorized! Logging out...");
-    api.dispatch(logoutUser("You have to be Logged In first"));
+    api.dispatch(logoutUser("You are not logged In"));
     window.location.href = "/login";
   }
 

@@ -1,4 +1,4 @@
-import mongoose, { isValidObjectId } from "mongoose";
+import mongoose, { isValidObjectId, mongo } from "mongoose";
 import { Video } from "../models/video.model.js";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -11,40 +11,42 @@ import {
 } from "../utils/cloudinary.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
+  //TODO: get all videos based on query, sort, pagination
   const {
     page = 1,
     limit = 10,
     query = "",
     sortBy = "createdAt",
     sortType = "desc",
-    userId,
-  } = req.query;
-  //TODO: get all videos based on query, sort, pagination
+    // userId,
+  } = req.query; 
 
-  // steps
-  // use match for query on the basis of title or description or i think we can do channel also
-  // perfom lookup for the user details for the video like username, avatar, etc
-  // project the details of the user
-  // use sort to sort the videos
-  // for pagination use page and limit to calculate skip and limit
+  console.log("query is reaching the backend: ", req.query);
 
-  const videos = await Video.aggregate([
+  const matchStage = {
+    isPublished: true, // Only fetch published videos
+    title: { $regex: query, $options: "i" },
+  };
+  
+  // if(userId){
+  //   if(!isValidObjectId(userId)) {
+  //     throw new ApiError(400, "Invalid user id");
+  //   }
+  //   matchStage.owner = new mongoose.Types.ObjectId(userId);
+  // }
+
+  const totalVideos = await Video.countDocuments(matchStage);
+
+  const pipeline = [
     // match stage for filtering
-    {
-      $match: {
-        $or: [
-          { title: { $regex: query || "", $options: "i" } },
-          { description: { $regex: query || "", $options: "i" } },
-        ],
-      },
-    },
+    { $match: matchStage },
     // lookup to fetch owner details
     {
       $lookup: {
         from: "users",
         localField: "owner",
         foreignField: "_id",
-        as: "createdBy",
+        as: "owner",
         pipeline: [
           {
             $project: {
@@ -58,43 +60,40 @@ const getAllVideos = asyncHandler(async (req, res) => {
     },
     {
       $addFields: {
-        createdBy: {
-          $first: "$createdBy",
+        owner: {
+          $first: "$owner",
         },
-      },
-    },
-    // project required details
-    {
-      $project: {
-        thumbnail: 1,
-        videoFile: 1,
-        title: 1,
-        description: 1,
-        createdBy: 1,
       },
     },
     // sorting
     {
       $sort: {
         [sortBy]: sortType === "asc" ? 1 : -1,
-      },
+      }, 
     },
-    //pagination
-    {
-      $skip: (page - 1) * limit,
-    },
-    {
-      $limit: parseInt(limit),
-    },
-  ]);
+    // pagination
+    { $skip: (parseInt(page) - 1) * parseInt(limit) },
+    { $limit: parseInt(limit) },
+  ];
+
+  const videos = await Video.aggregate(pipeline);
 
   if (!videos?.length) {
     throw new ApiError(404, "No videos found");
   }
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, videos[0], "Videos fetched successfully"));
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        videos,
+        totalVideos,
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalVideos / limit),
+      },
+      "Videos fetched successfully"
+    )
+  );
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -170,8 +169,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
 });
 
 const getVideoById = asyncHandler(async (req, res) => {
-  const { videoId } = req.params;
   //TODO: get video by id
+  const { videoId } = req.params;
 
   if (!videoId || !isValidObjectId(videoId)) {
     throw new ApiError(400, "Give a valid video id");

@@ -6,7 +6,7 @@ import { Form } from "./ui/form";
 import { Button } from "./ui/button";
 
 import { toast } from "react-toastify";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import RegisterFormInput from "./RegisterFormInput";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
@@ -48,6 +48,7 @@ const RegisterForm = () => {
     useState(false);
 
   const [register, { isLoading }] = useRegisterMutation();
+  const navigate = useNavigate()
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof RegisterFormSchema>>({
@@ -63,15 +64,13 @@ const RegisterForm = () => {
   // 2. Define a submit handler.
   async function onSubmit(userData: z.infer<typeof RegisterFormSchema>) {
     try {
-      console.log("form submitted", userData);
-
-      // Call the register mutation
-
       const response = await register(userData).unwrap();
 
       console.log(response);
 
       toast.success("User registered successfully");
+      navigate("/login", { replace: true });
+
     } catch (err) {
       console.error("Error while registering user:", err);
       toast.error(`${err?.data?.error || "Registration failed"}`);

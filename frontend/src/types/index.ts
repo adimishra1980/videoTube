@@ -3,8 +3,5 @@ export interface IUser {
   fullname: string;
   email: string;
   avatar: string;
-  coverImage?: string;
-  watchHistory?: any[];
-  createdAt: Date;
-  updatedAt: Date;
+  username: string
 }

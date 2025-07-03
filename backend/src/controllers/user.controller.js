@@ -87,11 +87,14 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const defaultAvatarPath = "public/imgs/no-profile-photo.jpg";
   let avatar = await uploadOnCloudinaryWithoutDelete(defaultAvatarPath);
-  // console.log(defaultAvatarPath)
+
+  const timestamp = Date.now().toString().slice(-5); // Get last 5 digits of timestamp
+  const username = `@${fullname.toLowerCase().replace(/\s+/g, "")}${timestamp}`;
 
   try {
     const user = await User.create({
       fullname,
+      username: username,
       avatar: avatar?.url,
       email,
       password,
@@ -114,6 +117,10 @@ const registerUser = asyncHandler(async (req, res) => {
   } catch (error) {
     console.log("User creation failed");
     console.log(error);
+
+    if(avatar){
+      await deleteFromCloudinary(avatar.public_id);
+    }
 
     throw new ApiError(
       500,
@@ -156,7 +163,7 @@ const loginUser = asyncHandler(async (req, res) => {
   );
 
   const loggedInUser = await User.findById(user._id).select(
-    "-password -refreshToken"
+    "-password -refreshToken -__v -createdAt -updatedAt -watchHistory"
   );
 
   const options = {
@@ -398,7 +405,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       $lookup: {
         from: "subscriptions",
         localField: "_id",
-        foreignField: "channel",
+        foreignField: "channel",  // calculating subscribers
         as: "subscribers",
       },
     },
@@ -413,7 +420,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     {
       $addFields: {
         subscribersCount: {
-          $size: "$subscribers",
+          $size: "$subscribers",   // size operator only gives the count
         },
         channelsSubscribedToCount: {
           $size: "$subscribedTo",
@@ -447,7 +454,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Channel does not exists");
   }
 
-  // console.log("Channel details: ", channel);
+  console.log("Channel details: ", channel);
 
   return res
     .status(200)

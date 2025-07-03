@@ -39,6 +39,10 @@ const videoSchema = new Schema(
   { timestamps: true }
 );
 
+
+// videoSchema.index({ title: "text", description: "text" }); // for searching 
+
+
 videoSchema.plugin(mongooseAggregatePaginate);
 
 export const Video = mongoose.model("Video", videoSchema);
