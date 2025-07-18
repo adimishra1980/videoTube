@@ -176,18 +176,93 @@ const getVideoById = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Give a valid video id");
   }
 
-  const video = await Video.findById(videoId).populate(
-    "owner",
-    "fullname username avatar"
+  let video = await Video.updateOne(
+    { _id: new mongoose.Types.ObjectId(videoId) },
+    { $inc: { views: 1 } }
   );
 
-  if (!video) {
+  const pipeline = [
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(videoId),
+      }
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+        pipeline: [
+          {
+            $project: {
+              fullname: 1,
+              username: 1,
+              avatar: 1,
+            }
+          }
+        ]
+      }
+    },
+    {
+      $lookup:{
+        from: "likes",
+        localField: "_id",
+        foreignField: "video",
+        as: "likes"
+      }
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "owner._id",
+        foreignField: "channel",
+        as: "subscribers"
+      }
+    },
+    {
+      $addFields:{
+        owner: {
+          $first: "$owner"
+        },
+        likes: {
+          $size: "$likes"
+        },
+        subscribers: {
+          $size: "$subscribers"
+        },
+        isSubscribed: {
+          $cond: {
+            if: {
+              $in: [req.user?._id, "$subscribers.subscriber"]
+            },
+            then: true,
+            else: false
+          }
+        },
+        isLiked:{
+          $cond: {
+            if: {
+              $in: [req.user?._id, "$likes.likedBy"]
+            },
+            then: true,
+            else: false
+          }
+        }
+      }
+    }
+  ]
+
+  video = await Video.aggregate(pipeline);
+
+
+  if (!video.length) {
     throw new ApiError(404, "Video not found");
   }
 
   return res
     .status(200)
-    .json(new ApiResponse(200, video, "Video fetched successfully"));
+    .json(new ApiResponse(200, video[0], "Video fetched successfully"));
 });
 
 const updateVideo = asyncHandler(async (req, res) => {

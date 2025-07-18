@@ -1,4 +1,5 @@
 // import { Link } from "lucide-react";
+import { Link } from "react-router-dom";
 import FormatDuration from "../utils/FormatDuration";
 import { formatTimeAgo } from "../utils/FormatTimeAgo";
 import { useEffect, useRef, useState } from "react";
@@ -19,7 +20,7 @@ export interface VideoGridItemProps {
   videoFile: string;
 }
 
-const VIEWS_FORMATTER = new Intl.NumberFormat(undefined, {
+export const VIEWS_FORMATTER = new Intl.NumberFormat(undefined, {
   notation: "compact",
 });
 
@@ -53,7 +54,7 @@ const VideoGridItem = ({
       onMouseEnter={() => setIsVideoPlaying(true)}
       onMouseLeave={() => setIsVideoPlaying(false)}
     >
-      <a href={`/watch?v=${_id}`} className="relative aspect-video">
+      <Link to={`/watch?v=${_id}`} className="relative aspect-video">
         <img
           src={thumbnail}
           className={`block w-full h-full object-cover transition-[border-radius] aspect-video duration-200 ${
@@ -74,26 +75,26 @@ const VideoGridItem = ({
             isVideoPlaying ? "opacity-100 delay-200" : "opacity-0"
           }  `}
         />
-      </a>
+      </Link>
 
       <div className="flex gap-2">
-        <a href={``} className="flex-shrink-0">
+        <Link to={``} className="flex-shrink-0">
           <img
             src={owner.avatar}
             className="w-12 h-12 rounded-full object-cover"
           />
-        </a>
+        </Link>
         <div className="flex flex-col">
-          <a href={`/:${_id}`} className="font-bold">
+          <Link to={`/:${_id}`} className="font-bold">
             {title}
-          </a>
+          </Link>
 
-          <a
-            href={`/:owner/:${owner._id}`}
+          <Link
+            to={`/:owner/:${owner._id}`}
             className="text-secondary-marginal-text text-sm hover:text-secondary-marginal-text-hover"
           >
             {owner.fullname}
-          </a>
+          </Link>
 
           <div className="text-secondary-marginal-text text-sm">
             {VIEWS_FORMATTER.format(views)} views •{" "}

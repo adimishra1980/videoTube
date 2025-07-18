@@ -5,6 +5,56 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
+const getSubscribedChannelsAggregate = async (subscriberId) => {
+  const pipeline = [
+    {
+      $match: {
+        subscriber: subscriberId,
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        channel: 1,
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        subscribedChannels: {
+          $push: "$channel",
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "subscribedChannels",
+        foreignField: "_id",
+        as: "subscribedChannels",
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+              fullname: 1,
+              avatar: 1,
+              username: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        subscribedChannels: 1,
+      },
+    },
+  ];
+
+  return Subscription.aggregate(pipeline);
+};
+
 const toggleSubscription = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
   // TODO: toggle subscription
@@ -15,7 +65,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 
   const userID = req.user._id;
 
-  const subscribed = await Subscription.findById({
+  const subscribed = await Subscription.findOne({
     channel: channelId,
     subscriber: userID,
   });
@@ -29,22 +79,26 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     });
 
     if (!subscirbe) {
-      throw new ApiError(500, "Error while subscribing to the channel");
+      throw new ApiError(400, "Error while subscribing to the channel");
     }
+
+    const subscritionsList = await getSubscribedChannelsAggregate(userID)
 
     return res
       .status(200)
-      .json(new ApiResponse(200, subscirbe, "Channel Subscribed"));
+      .json(new ApiResponse(200, subscritionsList[0], "Channel Subscribed"));
   }
 
   //unsubscribe the channel
-  const unsubscribe = await Subscription.deleteOne(subscribed._id);
+  const unsubscribe = await Subscription.findByIdAndDelete(subscribed._id);
 
   if (!unsubscribe) {
     throw new ApiError(500, "Error while unsubscribing from the channel");
   }
 
-  return res.status(200).json(new ApiResponse(200, {}, "Channel Unsubscribed"));
+  const subscritionsList = await getSubscribedChannelsAggregate(userID);
+
+  return res.status(200).json(new ApiResponse(200, subscritionsList[0], "Channel Unsubscribed"));
 });
 
 // controller to return subscriber list of a channel
@@ -60,7 +114,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   const subscribersList = await Subscription.aggregate([
     {
       $match: {
-        channel: mongoose.Types.ObjectId(channelId),
+        channel:new mongoose.Types.ObjectId(channelId),
       },
     },
     {
@@ -103,13 +157,13 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
   const userID = req.user._id;
 
   const totalCount = await Subscription.countDocuments({
-    subscriber: mongoose.Types.ObjectId(subscriberId),
+    subscriber: new mongoose.Types.ObjectId(subscriberId),
   });
 
   const subscribedChannels = await Subscription.aggregate([
     {
       $match: {
-        subscriber: mongoose.Types.ObjectId(subscriberId),
+        subscriber: new mongoose.Types.ObjectId(subscriberId),
       },
     },
     {
@@ -152,7 +206,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        { totalCount, channels: channelDetails },
+        { totalCount, channels: subscribedChannels },
         "Subscribed channels fetched successfully"
       )
     );

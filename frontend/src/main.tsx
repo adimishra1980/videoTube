@@ -3,18 +3,16 @@ import "./index.css";
 import App from "./App.tsx";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Home from "./pages/Home.tsx";
+import Home from "./pages/HomePage.tsx";
 
 import { store } from "./app/store.ts";
 import { Provider } from "react-redux";
 import RegisterForm from "./components/RegisterForm.tsx";
 import LoginForm from "./components/LoginForm.tsx";
+import Layout from "./Layout.tsx";
+import VideoPlayerPage from "./pages/VideoPlayerPage.tsx";
 
 const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Home />,
-  },
   {
     path: "/register",
     element: <RegisterForm />
@@ -22,6 +20,20 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginForm />
+  },
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      { 
+        path: "",
+        element: <Home />
+      },
+    ]
+  },
+  {
+    path: "watch",
+    element: <VideoPlayerPage />
   }
 ]);
 

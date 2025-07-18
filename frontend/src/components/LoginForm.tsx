@@ -11,10 +11,7 @@ import LoginFormInput from "./LoginFormInput";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLoginMutation } from "@/slices/usersApiSlice";
-import {
-  setUserCredentials,
-  clearLogoutMessage,
-} from "@/slices/authSlice";
+import { setUserCredentials, clearLogoutMessage } from "@/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 
 export const LoginFormSchema = z.object({
@@ -40,7 +37,6 @@ const LoginForm = () => {
     }
     dispatch(clearLogoutMessage());
   }, [logoutMessage, dispatch]);
-
 
   // useEffect(() => {
   //   console.log(

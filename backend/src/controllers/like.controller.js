@@ -1,5 +1,6 @@
 import mongoose, { isValidObjectId } from "mongoose";
 import { Like } from "../models/like.model.js";
+import { Video } from "../models/video.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -11,49 +12,41 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
   if (!videoId || !isValidObjectId(videoId)) {
     throw new ApiError(400, "Missing or Invalid video id");
   }
+  const video = await Video.findById(videoId);
+  if (!video) {
+    return next(new ApiError(404, `video with id ${videoId} does not exist`));
+  }
 
   const userID = req.user?._id;
 
-  const existingLike = await Like.findById({
+  const existingLike = await Like.findOne({
     video: videoId,
     likedBy: userID,
   });
 
-  let liked;
   if (existingLike) {
-    // unlike the video
-    const deletedVideoLike = await existingLike.deleteOne();
+    await existingLike.deleteOne();
 
-    if (!deletedVideoLike) {
+    if (!existingLike) {
       throw new ApiError(500, "Failed to unlike the video");
     }
-    liked = false;
-  } else {
-    // like the video
 
-    const likedVideoLike = await Like.create({
-      video: videoId,
-      likedBy: userID,
-    });
-
-    if (!likedVideoLike) {
-      throw new ApiError(500, "Failed to like the video");
-    }
-
-    liked = true;
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Video unliked successfully"));
   }
 
-  const totalLikes = await Like.countDocuments({ video: videoId });
+  const LikeDoc = await Like.create({
+    video: videoId,
+    likedBy: userID,
+  });
+  if (!LikeDoc) {
+    throw new ApiError(500, "Failed to like the video");
+  }
 
   return res
     .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        { videoId, liked, totalLikes },
-        liked ? "Video liked successfully" : "Video unliked successfully"
-      )
-    );
+    .json(new ApiResponse(200, {}, "Video liked successfully"));
 });
 
 const toggleCommentLike = asyncHandler(async (req, res) => {

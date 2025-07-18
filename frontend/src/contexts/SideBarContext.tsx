@@ -9,6 +9,8 @@ interface SideBarContextType {
   isSmallOpen: boolean;
   toggle: () => void;
   close: () => void;
+  isVideoPlaying?: boolean;
+  setIsVideoPlaying?: (playing: boolean) => void;
 }
 
 const SideBarContext = createContext<SideBarContextType | null>(null);
@@ -22,8 +24,9 @@ export function useSideBarContext() {
 }
 
 const SideBarProvider = ({ children }: SideBarProviderProps) => {
-  const [isLargeOpen, setIsLargeOpen] = useState(true);
+  const [isLargeOpen, setIsLargeOpen] = useState(false);
   const [isSmallOpen, setIsSmallOpen] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   useEffect(() => {
     const handler = () => {
@@ -60,7 +63,7 @@ const SideBarProvider = ({ children }: SideBarProviderProps) => {
 
   return (
     <SideBarContext.Provider
-      value={{ isLargeOpen, isSmallOpen, toggle, close }}
+      value={{ isLargeOpen, isSmallOpen, toggle, close, isVideoPlaying, setIsVideoPlaying }}
     >
       {children}
     </SideBarContext.Provider>

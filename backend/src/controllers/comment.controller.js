@@ -8,9 +8,14 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 const getVideoComments = asyncHandler(async (req, res) => {
   //TODO: get all comments for a video
   const { videoId } = req.params;
-  const { page = 1, limit = 10 } = req.query;
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = "createdAt",
+    sortType = "desc",
+  } = req.query;
 
-  if (!videoId || isValidObjectId(videoId)) {
+  if (!videoId || !isValidObjectId(videoId)) {
     return new ApiError(400, "Missing or Invalid video ID");
   }
 
@@ -19,11 +24,11 @@ const getVideoComments = asyncHandler(async (req, res) => {
     throw new ApiError(400, "No such video found");
   }
 
-  const comments = await Comment.aggregate([
+  const pipeline = [
     // match the comments of the video
     {
       $match: {
-        video: mongoose.Types.ObjectId(videoId),
+        video: new mongoose.Types.ObjectId(videoId),
       },
     },
     // populate the user details to it
@@ -60,55 +65,87 @@ const getVideoComments = asyncHandler(async (req, res) => {
       $project: {
         content: 1,
         createdBy: 1,
+        updatedAt: 1,
       },
     },
-    //pagination
     {
-      $skip: (page - 1) * limit,
+      $sort: {
+        updatedAt: -1,  // hardcode for latest to be the first comment
+      }, 
     },
-    {
-      $limit: parseInt(limit),
-    },
-  ]);
+  ];
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, comments, "Comments fetched"));
+  const options = {
+    page: parseInt(page),
+    limit: parseInt(limit),
+    pagination: true,
+  };
+
+  const aggregateQuery = Comment.aggregate(pipeline);
+
+  if (!aggregateQuery) {
+    return next(new ApiError(404, "no comments found fot this video"));
+  }
+
+  const result = await Comment.aggregatePaginate(aggregateQuery, options);
+
+  if (!result || result.docs?.length === 0) {
+    throw new ApiError(404, "No comments found for this video");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        totalDocs: result.totalDocs,
+        count: result.docs?.length,
+        totalComments: result.docs, 
+        totalPages: result.totalPages,
+        currentPage: result.page,
+        hasNextPage: result.hasNextPage,
+        hasPrevPage: result.hasPrevPage,
+        nextPage: result.nextPage,
+        prevPage: result.prevPage,
+        pagingCounter: result.pagingCounter,
+      },
+      "Comments fetched successfully"
+    )
+  );
 });
 
 const addComment = asyncHandler(async (req, res) => {
   // TODO: add a comment to a video
 
   const { videoId } = req.params;
-  const { content } = req.body;
+  const { comment } = req.body;
 
-  const userID = req.user.id;
+  const userID = req.user._id;
 
   if (!videoId || !isValidObjectId(videoId)) {
     throw new ApiError(400, "Missing or Invalid video ID");
   }
 
-  if (!content) {
+  if (!comment || comment.trim() === "") {
     throw new ApiError(400, "Please write something for comment");
   }
 
   const video = await Video.findById(videoId);
 
   if (!video) {
-    throw new ApiError(400, "Video does not found");
+    throw new ApiError(400, "Video does not exits");
   }
 
-  const comment = await Comment.create({
-    content,
+  const newComment = await Comment.create({
+    content: comment,
     video: videoId,
     owner: userID,
   });
 
-  if (!comment) {
-    throw new ApiError(400, "Failed to creating a comment");
+  if (!newComment) {
+    throw new ApiError(400, "Failed to create a comment");
   }
 
-  return res.status(200).json(new ApiResponse(200, comment, "Comment added"));
+  return res.status(200).json(new ApiResponse(200, newComment, "Comment added"));
 });
 
 const updateComment = asyncHandler(async (req, res) => {

@@ -63,6 +63,7 @@ function SideBar() {
         <div className="lg:hidden pt-2 pb-4 px-2 sticky top-0 bg-white dark:bg-[#0F0F0F]">
           <PageHeaderFirstSection />
         </div>
+        
         <LargeSidebarSection>
           <LargeSidebarItem isActive IconOrImgUrl={Home} title="Home" url="/" />
           <LargeSidebarItem
@@ -193,7 +194,7 @@ type LargeSidebarSectionProps = {
   visibleItemCount?: number;
 };
 
-function LargeSidebarSection({
+export function LargeSidebarSection({
   children,
   title,
   visibleItemCount = Number.POSITIVE_INFINITY,
@@ -231,7 +232,7 @@ type LargeSidebarItemProps = {
   isActive?: boolean;
 };
 
-function LargeSidebarItem({
+export function LargeSidebarItem({
   IconOrImgUrl,
   title,
   url,

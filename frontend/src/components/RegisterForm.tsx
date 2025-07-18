@@ -48,7 +48,7 @@ const RegisterForm = () => {
     useState(false);
 
   const [register, { isLoading }] = useRegisterMutation();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof RegisterFormSchema>>({
@@ -70,7 +70,6 @@ const RegisterForm = () => {
 
       toast.success("User registered successfully");
       navigate("/login", { replace: true });
-
     } catch (err) {
       console.error("Error while registering user:", err);
       toast.error(`${err?.data?.error || "Registration failed"}`);
@@ -154,7 +153,6 @@ const RegisterForm = () => {
                 "Create Account"
               )}
             </Button>
-            
           </form>
           <p className="text-center">
             Already have an Account?

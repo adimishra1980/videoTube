@@ -9,8 +9,15 @@ export const videoApiSlice = apiSlice.injectEndpoints({
         url: `${VIDEOS_URL}?page=${page}&limit=${limit}&query=${query}&sortBy=createdAt&sortType=desc`,
       }),
     }),
+    //request to backend to get video by id
+    getVideoById: builder.query({
+      query: (videoId) => ({
+        url: `${VIDEOS_URL}/${videoId}`,
+        method: "GET",
+      })
+    })
   }),
 });
 
 
-export const { useGetAllVideosQuery } = videoApiSlice;
+export const { useGetAllVideosQuery, useGetVideoByIdQuery } = videoApiSlice;

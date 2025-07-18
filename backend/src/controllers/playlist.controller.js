@@ -48,7 +48,7 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
     //match the owner's all playlists
     {
       $match: {
-        owner: mongoose.Types.ObjectId(userId),
+        owner: new mongoose.Types.ObjectId(userId),
       },
     },
     // lookup for getting owner's details
@@ -157,7 +157,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
     //match the owner's all playlists
     {
       $match: {
-        _id: mongoose.Types.ObjectId(playlistId),
+        _id: new mongoose.Types.ObjectId(playlistId),
       },
     },
     // lookup for getting owner's details
