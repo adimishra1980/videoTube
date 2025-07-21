@@ -21,7 +21,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
     // userId,
   } = req.query; 
 
-  console.log("query is reaching the backend: ", req.query);
+  // console.log("query is reaching the backend: ", req.query);
 
   const matchStage = {
     isPublished: true, // Only fetch published videos

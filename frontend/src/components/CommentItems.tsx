@@ -10,18 +10,25 @@ interface CommentItemsProps {
     fullname: string;
   };
   content: string;
-  updatedAt: Date | string
-  hoveredCommentId: string | null
-  setHoveredCommentId: (_id: string | null) => void
+  updatedAt: Date | string;
+  hoveredCommentId: string | null;
+  setHoveredCommentId: (_id: string | null) => void;
 }
 
-const CommentItems = ({ _id, createdBy, content, updatedAt, hoveredCommentId, setHoveredCommentId }: CommentItemsProps) => {
-
+const CommentItems = ({
+  _id,
+  createdBy,
+  content,
+  updatedAt,
+  hoveredCommentId,
+  setHoveredCommentId,
+}: CommentItemsProps) => {
   return (
-    <div 
-    onMouseEnter={() => setHoveredCommentId(_id)}
-    onMouseLeave={() => setHoveredCommentId(null)}
-    className="flex w-full gap-4 mt-8">
+    <div
+      onMouseEnter={() => setHoveredCommentId(_id)}
+      onMouseLeave={() => setHoveredCommentId(null)}
+      className="flex w-full gap-4 mt-8 mb-8"
+    >
       <img
         src={createdBy.avatar}
         alt={createdBy.fullname}
@@ -41,9 +48,7 @@ const CommentItems = ({ _id, createdBy, content, updatedAt, hoveredCommentId, se
           </div>
         </div>
 
-        <p className="w-[95%]">
-          {content}
-        </p>
+        <p className="w-[95%]">{content}</p>
 
         <div className="flex">
           <Button variant="ghost" size="icon" className="justify-normal">

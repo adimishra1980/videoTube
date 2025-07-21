@@ -15,6 +15,8 @@ const getVideoComments = asyncHandler(async (req, res) => {
     sortType = "desc",
   } = req.query;
 
+  console.log("query", req.query);
+
   if (!videoId || !isValidObjectId(videoId)) {
     return new ApiError(400, "Missing or Invalid video ID");
   }
@@ -60,18 +62,17 @@ const getVideoComments = asyncHandler(async (req, res) => {
     {
       $unwind: "$createdBy",
     },
-    // project the final output
+    {
+      $sort: {
+        [sortBy]: sortType === "asc" ? 1 : -1,
+      },
+    },
     {
       $project: {
         content: 1,
         createdBy: 1,
         updatedAt: 1,
       },
-    },
-    {
-      $sort: {
-        updatedAt: -1,  // hardcode for latest to be the first comment
-      }, 
     },
   ];
 
@@ -99,7 +100,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
       {
         totalDocs: result.totalDocs,
         count: result.docs?.length,
-        totalComments: result.docs, 
+        totalComments: result.docs,
         totalPages: result.totalPages,
         currentPage: result.page,
         hasNextPage: result.hasNextPage,
@@ -145,7 +146,9 @@ const addComment = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Failed to create a comment");
   }
 
-  return res.status(200).json(new ApiResponse(200, newComment, "Comment added"));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, newComment, "Comment added"));
 });
 
 const updateComment = asyncHandler(async (req, res) => {

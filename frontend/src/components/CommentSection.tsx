@@ -1,11 +1,5 @@
 import { Button } from "./Button";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useGetCurrentUserQuery } from "@/slices/usersApiSlice";
 import {
   useAddCommentMutation,
@@ -13,6 +7,8 @@ import {
 } from "@/slices/commentApiSlice";
 import CommentItems from "./CommentItems";
 import { toast } from "react-toastify";
+import CommentItemShimmer from "@/shimmers/CommentItemShimmer";
+import { Skeleton } from "./ui/skeleton";
 
 interface CommentSectionProps {
   videoId: string;
@@ -41,17 +37,18 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
   const [comments, setComments] = useState<IComment[]>([]);
   const [hasMore, setHasMore] = useState(true);
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const loaderRef = useRef<HTMLDivElement | null>(null);
 
   const {
     data,
-    isFetching,
+    isFetching: isCommentsFetching,
+    isLoading: isCommentsLoading,
     refetch: refetchComments,
   } = useGetVideoCommentsQuery(
     {
       videoId,
       page,
-      limit: 20,
+      limit: 9,
     },
     {
       skip: !videoId,
@@ -103,29 +100,35 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
     }
   }, [data, page]);
 
-  const handleScroll = useCallback(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = container;
-
-    if (
-      scrollHeight - scrollTop <= clientHeight + 100 &&
-      !isFetching &&
-      hasMore
-    ) {
-      setPage((prev) => prev + 1);
-    }
-  }, [isFetching, hasMore]);
-
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const scrollContainer = document.getElementById("scroll-container");
+    if (!scrollContainer || !loaderRef.current) return;
 
-    container.addEventListener("scroll", handleScroll);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting && hasMore && !isCommentsFetching) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      {
+        root: scrollContainer,
+        rootMargin: "100px",
+        threshold: 1.0,
+      }
+    );
 
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
+    const currentLoader = loaderRef.current;
+    if (currentLoader) {
+      observer.observe(currentLoader);
+    }
+
+    return () => {
+      if (currentLoader) {
+        observer.unobserve(currentLoader);
+      }
+    };
+  }, [hasMore, isCommentsFetching]);
 
   const renderedComments = useMemo(
     () =>
@@ -143,27 +146,40 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
     [comments, hoveredCommentId]
   );
 
-  const noCommentsFound = !isFetching && comments.length === 0;
+  const noCommentsFound = !isCommentsFetching && comments.length === 0;
 
   return (
     <div className="pt-4">
-      <h2 className="text-lg font-semibold">{data?.data?.count || 0} Comments</h2>
-      <div className="flex gap-4 pt-8">
-        <img
-          src={loggedInUser?.data?.avatar}
-          alt={loggedInUser?.data?.fullName}
-          className="object-cover object-center rounded-full size-12"
-          loading="lazy"
-        />
-        <input
-          type="text"
-          className="w-full h-5 pb-1 bg-transparent border-b-2 focus:border-b-2 focus:border-gray-100 focus:outline-none field-sizing-content"
-          placeholder="Add a comment..."
-          value={enteredComment}
-          onFocus={() => setIsFocused(true)}
-          onChange={handleCommentInput}
-        />
-      </div>
+      <h2 className="text-lg font-semibold">
+        {isCommentsLoading ? (
+          <>
+            <Skeleton className="h-8 w-40 mt-2" />
+          </>
+        ) : (
+          <>{data?.data?.totalDocs || 0} Comments</>
+        )}
+      </h2>
+
+      {isCommentsLoading ? (
+        <></>
+      ) : (
+        <div className="flex gap-4 pt-8">
+          <img
+            src={loggedInUser?.data?.avatar}
+            alt={loggedInUser?.data?.fullName}
+            className="object-cover object-center rounded-full size-12"
+            loading="lazy"
+          />
+          <input
+            type="text"
+            className="w-full h-5 pb-1 bg-transparent border-b-2 focus:border-b-2 focus:border-gray-100 focus:outline-none field-sizing-content"
+            placeholder="Add a comment..."
+            value={enteredComment}
+            onFocus={() => setIsFocused(true)}
+            onChange={handleCommentInput}
+          />
+        </div>
+      )}
 
       {isFocused && (
         <div className="flex justify-end gap-2">
@@ -190,11 +206,33 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
       )}
 
       {noCommentsFound ? (
-        <div className="flex items-center justify-center mt-10">
-          <p className="text-2xl">No comments yet</p>
+        <div className="flex items-center justify-center">
+          <p className="text-2xl">No comments found</p>
         </div>
       ) : (
-        <div className="">{renderedComments}</div>
+        <>
+          {isCommentsLoading && (
+            <div>
+              {Array.from({ length: 10 }).map((_, i) => (
+                <CommentItemShimmer key={i} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      <div className="">{renderedComments}</div>
+
+      <div
+        ref={loaderRef}
+        className={`h-10 ${noCommentsFound ? "hidden" : ""}`}
+        key="loader"
+      />
+
+      {isCommentsFetching && (
+        <div className="flex items-center justify-center py-4">
+          <div className="w-8 h-8 border-4 border-secondary-marginal-text rounded-full border-t-transparent animate-spin"></div>
+        </div>
       )}
     </div>
   );
