@@ -24,9 +24,10 @@ import {
 import { Children, ElementType, ReactNode, useState } from "react";
 import { Button, buttonStyles } from "../components/Button";
 import { twMerge } from "tailwind-merge";
-import { playlists, subscriptions } from "../data/SideBar";
+import { subscriptions } from "../data/SideBar";
 import { useSideBarContext } from "../contexts/SideBarContext";
 import { PageHeaderFirstSection } from "./PageHeader";
+import { BiLike } from "react-icons/bi";
 
 function SideBar() {
   const { isLargeOpen, isSmallOpen, close } = useSideBarContext();
@@ -54,16 +55,20 @@ function SideBar() {
           className="lg:hidden fixed inset-0 z-[999] bg-secondary-marginal-dark opacity-50"
         ></div>
       )}
-      
+
       <aside
         className={`w-56 lg:sticky absolute top-0 overflow-y-auto scrollbar-hidden pb-4 flex-col gap-2 px-2 ${
           isLargeOpen ? "lg:flex" : "lg:hidden"
-        } ${isSmallOpen ? "flex z-[999] bg-white dark:bg-[#0F0F0F] max-h-screen" : "hidden"}`}
+        } ${
+          isSmallOpen
+            ? "flex z-[999] bg-white dark:bg-[#0F0F0F] max-h-screen"
+            : "hidden"
+        }`}
       >
         <div className="lg:hidden pt-2 pb-4 px-2 sticky top-0 bg-white dark:bg-[#0F0F0F]">
           <PageHeaderFirstSection />
         </div>
-        
+
         <LargeSidebarSection>
           <LargeSidebarItem isActive IconOrImgUrl={Home} title="Home" url="/" />
           <LargeSidebarItem
@@ -75,14 +80,14 @@ function SideBar() {
         <hr />
         <LargeSidebarSection visibleItemCount={5}>
           <LargeSidebarItem
-            IconOrImgUrl={Library}
-            title="Library"
-            url="/library"
-          />
-          <LargeSidebarItem
             IconOrImgUrl={History}
             title="History"
             url="/history"
+          />
+          <LargeSidebarItem
+            IconOrImgUrl={ListVideo}
+            title="Playlists"
+            url={`/feed/playlists`}
           />
           <LargeSidebarItem
             IconOrImgUrl={PlaySquare}
@@ -94,14 +99,11 @@ function SideBar() {
             title="Watch Later"
             url="/playlist?list=WL"
           />
-          {playlists.map((playlist) => (
-            <LargeSidebarItem
-              key={playlist.id}
-              IconOrImgUrl={ListVideo}
-              title={playlist.name}
-              url={`/playlist?list=${playlist.id}`}
-            />
-          ))}
+          <LargeSidebarItem
+            IconOrImgUrl={BiLike}
+            title="Liked videos"
+            url="/playlist?list=LL"
+          />
         </LargeSidebarSection>
         <hr />
         <LargeSidebarSection title="Subscriptions">

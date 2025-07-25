@@ -18,7 +18,7 @@ const Home = () => {
   const { data, isLoading, isFetching } = useGetAllVideosQuery(
     {
       page,
-      limit: 9,
+      limit: 20,
     },
     {
       skip: !hasMore,

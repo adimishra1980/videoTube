@@ -21,6 +21,7 @@ import { Bell, BellRing } from "lucide-react";
 import { toast } from "react-toastify";
 import { Skeleton } from "@/components/ui/skeleton";
 import CommentSection from "@/components/CommentSection";
+import VideoPlayer from "@/components/VideoPlayer";
 
 const VideoPlayerPage = () => {
   const [videoId, setVideoId] = useState("");
@@ -145,13 +146,13 @@ const VideoPlayerPage = () => {
         id="scroll-container"
         className="grid grid-cols-[2.5fr,1fr] flex-grow-1 overflow-y-auto overflow-x-hidden px-10 mt-4 gap-4 h-[calc(100vh-90px)]"
       >
-        <div className=" h-full">
-          <div className="flex flex-col w-full relative ">
-            <div className={`w-full h-[70vh] rounded-xl`}>
+        <div className=" h-full w-full">
+          <div className="w-full relative aspect-video flex flex-col">
+            <div className={`w-full rounded-xl aspect-video relative`}>
               {isVideoLoading ? (
-                <Skeleton className=" w-full h-full rounded-lg" />
+                <Skeleton className=" w-full h-full rounded-xl" />
               ) : (
-                <></>
+                <VideoPlayer videoFile={video?.data?.videoFile}/> 
               )}
             </div>
 

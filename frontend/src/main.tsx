@@ -11,6 +11,7 @@ import RegisterForm from "./components/RegisterForm.tsx";
 import LoginForm from "./components/LoginForm.tsx";
 import Layout from "./Layout.tsx";
 import VideoPlayerPage from "./pages/VideoPlayerPage.tsx";
+import SelectPlaylistsPage from "./pages/SelectPlaylistsPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
         path: "",
         element: <Home />
       },
+      {
+        path: "playlist",
+        element: <SelectPlaylistsPage />
+      }
     ]
   },
   {

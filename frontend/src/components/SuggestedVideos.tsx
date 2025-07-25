@@ -53,7 +53,7 @@ const SuggestedVideos = ({ currentVideoId }: SuggestedVideosProps) => {
         }
       },
       {
-        root: scrollContainer,
+        root: null,
         rootMargin: "100px",
         threshold: 1.0,
       }

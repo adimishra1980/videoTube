@@ -5,7 +5,6 @@ import {
   Clapperboard,
   Clock,
   Home,
-  Library,
   PlaySquare,
   History,
   ListVideo,
@@ -21,7 +20,8 @@ import {
   Shirt,
   Podcast,
 } from "lucide-react";
-import { playlists, subscriptions } from "@/data/SideBar";
+import { subscriptions } from "@/data/SideBar";
+import { BiLike } from "react-icons/bi";
 
 const VideoSideBar = () => {
   const { isLargeOpen, isSmallOpen, close } = useSideBarContext();
@@ -42,7 +42,9 @@ const VideoSideBar = () => {
       )}
 
       <aside
-        className={`w-56 absolute top-0 overflow-y-auto scrollbar-hidden pb-4 flex-col gap-2 px-2  z-[999] bg-white dark:bg-[#0F0F0F] max-h-screen ${isLargeOpen ? "lg:flex" : "lg:hidden flex"} ${isSmallOpen ? "flex" : "hidden"}`}
+        className={`w-56 absolute top-0 overflow-y-auto scrollbar-hidden pb-4 flex-col gap-2 px-2  z-[999] bg-white dark:bg-[#0F0F0F] max-h-screen ${
+          isLargeOpen ? "lg:flex" : "lg:hidden flex"
+        } ${isSmallOpen ? "flex" : "hidden"}`}
       >
         <div className="pt-2 pb-4 px-2 sticky top-0 bg-white dark:bg-[#0F0F0F]">
           <PageHeaderFirstSection />
@@ -58,14 +60,14 @@ const VideoSideBar = () => {
         <hr />
         <LargeSidebarSection visibleItemCount={5}>
           <LargeSidebarItem
-            IconOrImgUrl={Library}
-            title="Library"
-            url="/library"
-          />
-          <LargeSidebarItem
             IconOrImgUrl={History}
             title="History"
             url="/history"
+          />
+          <LargeSidebarItem
+            IconOrImgUrl={ListVideo}
+            title="Playlists"
+            url={`/feed/playlists`}
           />
           <LargeSidebarItem
             IconOrImgUrl={PlaySquare}
@@ -77,14 +79,11 @@ const VideoSideBar = () => {
             title="Watch Later"
             url="/playlist?list=WL"
           />
-          {playlists.map((playlist) => (
-            <LargeSidebarItem
-              key={playlist.id}
-              IconOrImgUrl={ListVideo}
-              title={playlist.name}
-              url={`/playlist?list=${playlist.id}`}
-            />
-          ))}
+          <LargeSidebarItem
+            IconOrImgUrl={BiLike}
+            title="Liked videos"
+            url="/playlist?list=LL"
+          />
         </LargeSidebarSection>
         <hr />
         <LargeSidebarSection title="Subscriptions">

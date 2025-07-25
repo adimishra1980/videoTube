@@ -9,7 +9,14 @@ export const likeApiSlice = apiSlice.injectEndpoints({
         method: "POST",
       }),
     }),
+
+    getLikedVideos: builder.query({
+      query: () => ({
+        url: `${LIKES_URL}/videos`,
+      }),
+    }),
   }),
 });
 
-export const { useToggleVideoLikeMutation } = likeApiSlice;
+export const { useToggleVideoLikeMutation, useGetLikedVideosQuery } =
+  likeApiSlice;
