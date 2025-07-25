@@ -17,8 +17,6 @@ interface SideBarContextType {
   close: () => void;
   isVideoPlaying?: boolean;
   setIsVideoPlaying?: (playing: boolean) => void;
-  isSmallHidden: boolean;
-  hideSmallSideBar: (hidden: boolean) => void;
 }
 
 const SideBarContext = createContext<SideBarContextType | null>(null);
@@ -36,7 +34,6 @@ const SideBarProvider = ({ children }: SideBarProviderProps) => {
   const [isSmallOpen, setIsSmallOpen] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
-  const [isSmallHidden, setIsSmallHidden] = useState(false);
 
   useEffect(() => {
     const handler = () => {
@@ -70,11 +67,6 @@ const SideBarProvider = ({ children }: SideBarProviderProps) => {
     }
   }
 
-  // This function will be called by pages that need special behavior
-  function hideSmallSidebar(hidden: boolean) {
-    setIsSmallHidden(hidden);
-  }
-
   return (
     <SideBarContext.Provider
       value={{
@@ -84,8 +76,6 @@ const SideBarProvider = ({ children }: SideBarProviderProps) => {
         close,
         isVideoPlaying,
         setIsVideoPlaying,
-        isSmallHidden,
-        hideSmallSidebar,
       }}
     >
       {children}

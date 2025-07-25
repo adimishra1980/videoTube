@@ -64,10 +64,8 @@ const EmptyState = () => (
 const LikedVideosPage = () => {
   const [gradient, setGradient] = useState("");
 
-  const {
-    data: likedVideos,
-    isLoading: isLikedVideosLoading,
-  } = useGetLikedVideosQuery({});
+  const { data: likedVideos, isLoading: isLikedVideosLoading } =
+    useGetLikedVideosQuery({});
 
   const { data: loggedInUser } = useGetCurrentUserQuery(null);
 
@@ -110,14 +108,16 @@ const LikedVideosPage = () => {
     <div className="lg:overflow-y-hidden gap-14 grid grid-cols-1 lg:grid-cols-[360px,minmax(0,1fr)]">
       {/* left sticky section */}
       <section
-        className="mt-2 lg:ml-10 lg:sticky top-0  flex flex-col px-4 py-2 rounded-2xl w-full"
+        className="mt-2 lg:ml-10 lg:sticky top-0  flex flex-col lg:px-4 px-10 py-2 rounded-2xl w-full"
         style={{ background: gradient || "transparent" }}
       >
-        <img
+        <a href={`/watch?v=${likedVideos?.data[0]?.video?._id}`}>
+          <img
           className="mt-4 rounded-xl object-cover w-full"
           src={likedVideos?.data[0]?.video?.thumbnail}
           alt={firstVideo?.title}
         />
+        </a>
 
         <h1 className="text-2xl font-bold mt-4 mx-1 tracking-tight">
           Liked videos

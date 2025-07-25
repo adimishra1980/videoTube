@@ -30,18 +30,13 @@ import { PageHeaderFirstSection } from "./PageHeader";
 import { BiLike } from "react-icons/bi";
 
 function SideBar() {
-  const { isLargeOpen, isSmallOpen, close, isSmallHidden } =
-    useSideBarContext();
+  const { isLargeOpen, isSmallOpen, close } = useSideBarContext();
 
   return (
     <>
       <aside
-        className={`sticky top-0 overflow-y-auto scrollbar-hidden pb-4 flex flex-col ml-1 ${
-          isLargeOpen ? "lg:hidden" : "lg:flex"
-        }  ${
-          //on mobile devices, it's hidden otherwise it's flex
-          // on large screen sizes it's always flex
-          isSmallHidden ? "hidden" : "flex"
+        className={`sticky top-0 overflow-y-auto scrollbar-hidden pb-4 hidden flex-col ml-1 ${
+          isLargeOpen ? "lg:hidden" : "md:flex"
         }`}
       >
         <SmallSidebarItem Icon={Home} title="Home" url="/" />
@@ -62,7 +57,7 @@ function SideBar() {
       )}
 
       <aside
-        className={`w-56 lg:sticky absolute top-0 overflow-y-auto scrollbar-hidden pb-4 flex-col gap-2 px-2 ${
+        className={`w-60 lg:sticky absolute top-0 overflow-y-auto scrollbar-hidden pb-4 flex-col gap-2 px-2 ${
           isLargeOpen ? "lg:flex" : "lg:hidden"
         } ${
           isSmallOpen
@@ -262,7 +257,7 @@ export function LargeSidebarItem({
       ) : (
         <IconOrImgUrl className="w-6 h-6" />
       )}
-      <div className="whitespace-nowrap overflow-hidden text-ellipsis text-secondary-marginal-text-hover">
+      <div className="whitespace-nowrap overflow-hidden text-ellipsis text-secondary-marginal-text-hover text-base">
         {title}
       </div>
     </a>
