@@ -1,4 +1,10 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 type SideBarProviderProps = {
   children: ReactNode;
@@ -11,6 +17,8 @@ interface SideBarContextType {
   close: () => void;
   isVideoPlaying?: boolean;
   setIsVideoPlaying?: (playing: boolean) => void;
+  isSmallHidden: boolean;
+  hideSmallSideBar: (hidden: boolean) => void;
 }
 
 const SideBarContext = createContext<SideBarContextType | null>(null);
@@ -28,18 +36,19 @@ const SideBarProvider = ({ children }: SideBarProviderProps) => {
   const [isSmallOpen, setIsSmallOpen] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
+  const [isSmallHidden, setIsSmallHidden] = useState(false);
+
   useEffect(() => {
     const handler = () => {
-      if(!isSmallScreen()) setIsSmallOpen(false)
-    }
+      if (!isSmallScreen()) setIsSmallOpen(false);
+    };
 
-    window.addEventListener("resize", handler)
+    window.addEventListener("resize", handler);
 
     return () => {
-    window.removeEventListener("resize", handler)
-    }
-  }, [])
-
+      window.removeEventListener("resize", handler);
+    };
+  }, []);
 
   function isSmallScreen() {
     return window.innerWidth < 1024;
@@ -61,9 +70,23 @@ const SideBarProvider = ({ children }: SideBarProviderProps) => {
     }
   }
 
+  // This function will be called by pages that need special behavior
+  function hideSmallSidebar(hidden: boolean) {
+    setIsSmallHidden(hidden);
+  }
+
   return (
     <SideBarContext.Provider
-      value={{ isLargeOpen, isSmallOpen, toggle, close, isVideoPlaying, setIsVideoPlaying }}
+      value={{
+        isLargeOpen,
+        isSmallOpen,
+        toggle,
+        close,
+        isVideoPlaying,
+        setIsVideoPlaying,
+        isSmallHidden,
+        hideSmallSidebar,
+      }}
     >
       {children}
     </SideBarContext.Provider>

@@ -30,13 +30,18 @@ import { PageHeaderFirstSection } from "./PageHeader";
 import { BiLike } from "react-icons/bi";
 
 function SideBar() {
-  const { isLargeOpen, isSmallOpen, close } = useSideBarContext();
+  const { isLargeOpen, isSmallOpen, close, isSmallHidden } =
+    useSideBarContext();
 
   return (
     <>
       <aside
         className={`sticky top-0 overflow-y-auto scrollbar-hidden pb-4 flex flex-col ml-1 ${
           isLargeOpen ? "lg:hidden" : "lg:flex"
+        }  ${
+          //on mobile devices, it's hidden otherwise it's flex
+          // on large screen sizes it's always flex
+          isSmallHidden ? "hidden" : "flex"
         }`}
       >
         <SmallSidebarItem Icon={Home} title="Home" url="/" />
